@@ -1,23 +1,18 @@
 from helpers.logger import StreamLogger
 from services.ivalidate_user import IValidateUserService
 from helpers.ipass_hashing import IPasswordHashingHelperClass
-from entities.user import User
-from helpers.ijwt_token import IJwttokenHelperClass
+from helpers.security import username_mapping
 
 class ValidateUserService(IValidateUserService):
-    def __init__(self,hash:IPasswordHashingHelperClass,jwt:IJwttokenHelperClass):
+    def __init__(self,hash:IPasswordHashingHelperClass):
         self.stream_logger = StreamLogger.getLogger(__name__)
         self.hash = hash
-        self.jwt = jwt
 
-    def validate_user_credentials(self,email,password):
-       
-        current_user = User(email=email,password=password)
+    def authenticate(self,username,password):
+        print(username)
         password_hash = self.hash.generate_hash(password)
-        saved_password_hash = open("pass.txt", "r")
-        if password_hash == saved_password_hash.read():
-            user_email = current_user.email
-            jwt_token = self.jwt.generate_jwt_token({"email": user_email})
-            return jwt_token
+        user = username_mapping.get(username,None)
+        if user and user.password == password_hash:
+            return user
         else:
-            return self.stream_logger.info("Error generating jwt")
+            return self.stream_logger.info("Error authenticate user")

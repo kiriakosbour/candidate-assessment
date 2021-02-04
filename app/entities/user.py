@@ -1,8 +1,9 @@
 import json
 
 class User():
-    def __init__(self, email=None, password=None):
-        self.email = email
+    def __init__(self,_id ,username=None, password=None):
+        self.id = _id
+        self.username = username
         self.password = password
         
     def toJson(self):

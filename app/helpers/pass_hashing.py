@@ -8,6 +8,5 @@ class PasswordHashingHelperClass(IPasswordHashingHelperClass):
 
     def generate_hash(self,plain_password):
         password_hash =  hashlib.sha256(b'test')
-        print(password_hash)
         self.stream_logger.info("Successfullly hashed the password")
         return password_hash.hexdigest()
