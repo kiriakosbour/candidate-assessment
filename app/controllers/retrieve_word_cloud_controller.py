@@ -10,6 +10,6 @@ class TwitterConnectionController():
         if format != 'json' and format != 'csv':
             print(format)
             return {"Message": f"Bad request the format must be json or csv ."}, 400
-        words = self.service.get_twitter()
-        response = self.service.sort_words(words,format,word_count)
+        words,dates = self.service.get_twitter()
+        response = self.service.sort_words(words,dates,format,word_count)
         return response

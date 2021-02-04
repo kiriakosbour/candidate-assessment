@@ -7,7 +7,7 @@ class ITwitterConnectorService(object):
                        
         raise NotImplementedError         
     
-    def sort_words(self,words):
+    def sort_words(self,words,dates,format,count):
         """  
         """
                        

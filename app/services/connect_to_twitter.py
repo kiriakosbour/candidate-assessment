@@ -25,12 +25,14 @@ class TwitterConnectorService():
         twitter_api = tweepy.API(auth)
         last_24hour_date_time = datetime.now() - timedelta(hours = 24)
         end_date = datetime.now().strftime("%Y-%m-%d")
-        startDate = last_24hour_date_time.strftime("%Y-%m-%d")
+        start_date = last_24hour_date_time.strftime("%Y-%m-%d")
         text = ""
         words = []
+        dates = []
         try:
-            tweets = tweepy.Cursor(twitter_api.search,q="#Marvel",lang="en",remove = [],since=startDate,until=end_date).items(100)
+            tweets = tweepy.Cursor(twitter_api.search,q="#Marvel",lang="en",remove = [],since=start_date,until=end_date).items(500)
             for tweet in tweets:
+                dates.append(tweet.created_at)
                 text += tweet.text.lower()
                 no_links = re.sub(r'http\S+', '', text)
                 no_unicode = re.sub(r"\\[a-z][a-z]?[0-9]+", '', no_links)
@@ -45,10 +47,10 @@ class TwitterConnectorService():
         except Exception as exp:
             print(exp.args)
        
-        return words
+        return words,dates
        
 
-    def sort_words(self,words,format,count):
+    def sort_words(self,words,dates,format,count):
         self.stream_logger.info("Sorting word array...")
         frequency = {}
         counter = Counter()
@@ -57,7 +59,7 @@ class TwitterConnectorService():
         frequency = operator.itemgetter(1) #return a tuple like r[1]
         list_of_results = []
         for key, value in sorted(counter.items(), reverse=True, key=frequency):#creates atuple with key the word and value the counter and sorts them by value due to key being the r[1] element
-            # results = {key:value}
+            
             list_of_results.append(key)
 
         if format =="json":
@@ -66,6 +68,9 @@ class TwitterConnectorService():
             while i < count:
                 list_of_json.append({"value":list_of_results[i]})
                 i += 1
+            list_of_json.append({"date_of_the_first_tweet":str(dates[0])})
+            list_of_json.append({"date_of_the_last_tweet":str(dates[-1])})
+            
             return json.dumps(list_of_json)
         else:
             i=0     
@@ -73,4 +78,6 @@ class TwitterConnectorService():
                 result_file = open('filePath.csv', 'a')
                 result_file.write("{}{}".format(list_of_results[i], '\n'))
                 i += 1
+            result_file.write("{}{}".format(str(dates[0]), '\n'))
+            result_file.write("{}{}".format(str(dates[-1]), '\n'))
             return {"result":"the csv is created"}
